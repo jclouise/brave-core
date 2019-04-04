@@ -159,6 +159,10 @@ action("create_unsigned_dmg") {
     "//brave:chrome_app",
     "//chrome/installer/mac"
   ]
+
+  if (enable_widevine_cdm_host_verification) {
+    deps += [ ":sign_chrome_framework_for_widevine" ]
+  }
 }
 
 action("sign_dmg") {
@@ -216,10 +220,11 @@ if (enable_widevine_cdm_host_verification) {
       getenv("SIGN_WIDEVINE_PASSPHRASE"),
     ]
 
-    deps = [
-      ":sign_app",
-      "//brave:chrome_app",
-    ]
+    deps = [ "//brave:chrome_app" ]
+
+    if (!skip_signing) {
+      deps += [ ":sign_app" ]
+    }
   }
 }
 
