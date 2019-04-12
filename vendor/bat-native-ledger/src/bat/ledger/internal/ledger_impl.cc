@@ -1395,8 +1395,9 @@ double LedgerImpl::GetDefaultContributionAmount() {
   return bat_state_->GetDefaultContributionAmount();
 }
 
-bool LedgerImpl::HasSufficientBalanceToReconcile() {
-  return GetBalance() >= GetContributionAmount();
+void LedgerImpl::HasSufficientBalanceToReconcile(
+    ledger::HasSufficientBalanceToReconcileCallback callback) {
+  bat_contribution_->HasSufficientBalance(callback);
 }
 
 void LedgerImpl::SaveNormalizedPublisherList(

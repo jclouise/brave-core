@@ -213,6 +213,10 @@ class RewardsServiceImpl : public RewardsService,
   // Testing methods
   void SetLedgerEnvForTesting();
   void StartAutoContributeForTest();
+  void CheckInsufficientFundsForTesting();
+  void SetContributionAmountForTesting(double amount) const;
+  void MaybeShowNotificationAddFundsForTesting(
+      base::OnceCallback<void(bool)> callback);
 
  private:
   friend class RewardsServiceTest;
