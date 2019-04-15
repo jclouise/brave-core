@@ -5,14 +5,14 @@
 
 #include "brave/browser/brave_rewards/donations_dialog.h"
 
-#include <memory>
 #include <string>
+#include <utility>
 #include <vector>
 
-#include "base/values.h"
 #include "base/json/json_reader.h"
 #include "base/json/json_writer.h"
 #include "base/strings/utf_string_conversions.h"
+#include "base/values.h"
 #include "brave/common/webui_url_constants.h"
 #include "chrome/browser/ui/browser.h"
 #include "chrome/browser/ui/browser_finder.h"
@@ -36,8 +36,9 @@ constexpr int kDialogMaxHeight = 700;
 // A ui::WebDialogDelegate that specifies the donation dialog appearance.
 class DonationDialogDelegate : public ui::WebDialogDelegate {
  public:
-  explicit DonationDialogDelegate(WebContents* initiator,
-                                          std::string publisher_key);
+  explicit DonationDialogDelegate(
+      WebContents* initiator,
+      std::unique_ptr<base::DictionaryValue> params);
   ~DonationDialogDelegate() override;
 
   ui::ModalType GetDialogModalType() const override;
@@ -53,15 +54,15 @@ class DonationDialogDelegate : public ui::WebDialogDelegate {
 
  private:
   WebContents* initiator_;
-  const std::string publisher_key_;
+  std::unique_ptr<base::DictionaryValue> params_;
 
   DISALLOW_COPY_AND_ASSIGN(DonationDialogDelegate);
 };
 
-DonationDialogDelegate::DonationDialogDelegate(WebContents* initiator,
-                                                    std::string publisher_key)
-    : initiator_(initiator),
-      publisher_key_(publisher_key) {
+DonationDialogDelegate::DonationDialogDelegate(
+    WebContents* initiator,
+    std::unique_ptr<base::DictionaryValue> params)
+  : initiator_(initiator), params_(std::move(params)) {
 }
 
 DonationDialogDelegate::~DonationDialogDelegate() {
@@ -111,11 +112,9 @@ void DonationDialogDelegate::GetDialogSize(gfx::Size* size) const {
 }
 
 std::string DonationDialogDelegate::GetDialogArgs() const {
-  std::string data;
-  base::DictionaryValue dialog_args;
-  dialog_args.SetString("publisherKey", publisher_key_);
-  base::JSONWriter::Write(dialog_args, &data);
-  return data;
+  std::string json;
+  base::JSONWriter::Write(*params_, &json);
+  return json;
 }
 
 void DonationDialogDelegate::OnDialogClosed(
@@ -123,7 +122,7 @@ void DonationDialogDelegate::OnDialogClosed(
 }
 
 void DonationDialogDelegate::OnCloseContents(WebContents* /* source */,
-                                                 bool* out_close_dialog) {
+                                             bool* out_close_dialog) {
   *out_close_dialog = true;
 }
 
@@ -136,7 +135,7 @@ bool DonationDialogDelegate::ShouldShowDialogTitle() const {
 namespace brave_rewards {
 
 void OpenDonationDialog(WebContents* initiator,
-                        const std::string& publisher_key) {
+                        std::unique_ptr<base::DictionaryValue> params) {
   content::WebContents* outermost_web_contents =
     guest_view::GuestViewBase::GetTopLevelWebContents(initiator);
   gfx::Size host_size = outermost_web_contents->GetContainerBounds().size();
@@ -147,7 +146,7 @@ void OpenDonationDialog(WebContents* initiator,
   // resize)
   ShowConstrainedWebDialogWithAutoResize(
       initiator->GetBrowserContext(),
-      std::make_unique<DonationDialogDelegate>(initiator, publisher_key),
+      std::make_unique<DonationDialogDelegate>(initiator, std::move(params)),
       initiator, min_size, max_size);
 }
 

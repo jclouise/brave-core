@@ -12,19 +12,19 @@
 #include "base/bind.h"
 #include "brave/browser/brave_rewards/donations_dialog.h"
 #include "brave/common/extensions/api/brave_rewards.h"
-#include "brave/components/brave_rewards/browser/rewards_service.h"
-#include "brave/components/brave_rewards/browser/rewards_service_factory.h"
 #include "brave/components/brave_ads/browser/ads_service.h"
 #include "brave/components/brave_ads/browser/ads_service_factory.h"
-#include "content/public/browser/web_contents.h"
+#include "brave/components/brave_rewards/browser/rewards_service.h"
+#include "brave/components/brave_rewards/browser/rewards_service_factory.h"
 #include "chrome/browser/extensions/api/tabs/tabs_constants.h"
 #include "chrome/browser/extensions/extension_tab_util.h"
 #include "chrome/browser/profiles/profile.h"
+#include "content/public/browser/web_contents.h"
 
-using brave_rewards::RewardsService;
-using brave_rewards::RewardsServiceFactory;
 using brave_ads::AdsService;
 using brave_ads::AdsServiceFactory;
+using brave_rewards::RewardsService;
+using brave_rewards::RewardsServiceFactory;
 
 namespace extensions {
 namespace api {
@@ -69,7 +69,13 @@ ExtensionFunction::ResponseAction BraveRewardsDonateToSiteFunction::Run() {
     return RespondNow(Error(tabs_constants::kTabNotFoundError,
                             base::IntToString(params->tab_id)));
   }
-  ::brave_rewards::OpenDonationDialog(contents, params->publisher_key);
+
+  auto params_dict = std::make_unique<base::DictionaryValue>();
+  params_dict->SetString("publisherKey", params->publisher_key);
+  ::brave_rewards::OpenDonationDialog(contents, std::move(params_dict));
+
+  return RespondNow(NoArguments());
+}
 
   return RespondNow(NoArguments());
 }
