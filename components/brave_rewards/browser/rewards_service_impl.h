@@ -210,6 +210,13 @@ class RewardsServiceImpl : public RewardsService,
   const RewardsNotificationService::RewardsNotificationsMap&
   GetAllNotifications() override;
 
+  void SaveTwitterPublisherInfo(
+      const std::string& publisher_key,
+      const std::string& screen_name,
+      const std::string& url,
+      const std::string& favicon_url,
+      SaveTwitterPublisherInfoCallback callback) override;
+
   // Testing methods
   void SetLedgerEnvForTesting();
   void StartAutoContributeForTest();
@@ -472,6 +479,9 @@ class RewardsServiceImpl : public RewardsService,
       RefreshPublisherCallback callback,
       const std::string& publisher_key,
       bool verified);
+  void OnTwitterPublisherInfoSaved(SaveTwitterPublisherInfoCallback callback,
+                                   int result,
+                                   const std::string& json_publisher_info);
 
   bool Connected() const;
   void ConnectionClosed();

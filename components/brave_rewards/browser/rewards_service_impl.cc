@@ -1081,6 +1081,15 @@ void RewardsServiceImpl::OnPublisherInfoSaved(
   }
 }
 
+void RewardsServiceImpl::OnTwitterPublisherInfoSaved(
+    SaveTwitterPublisherInfoCallback callback,
+    int result,
+    const std::string& json_publisher_info) {
+  if (Connected()) {
+    callback.Run();
+  }
+}
+
 void RewardsServiceImpl::SaveActivityInfo(
     std::unique_ptr<ledger::PublisherInfo> publisher_info,
     ledger::PublisherInfoCallback callback) {
@@ -2214,6 +2223,21 @@ void RewardsServiceImpl::SaveRecurringTip(
                     publisher_info_backend_.get()),
       base::Bind(&RewardsServiceImpl::OnRecurringTipSaved,
                      AsWeakPtr()));
+}
+
+void RewardsServiceImpl::SaveTwitterPublisherInfo(
+    const std::string& publisher_key,
+    const std::string& screen_name,
+    const std::string& url,
+    const std::string& favicon_url,
+    SaveTwitterPublisherInfoCallback callback) {
+  bat_ledger_->SaveTwitterPublisherInfo(
+      publisher_key,
+      screen_name,
+      url,
+      favicon_url,
+      base::BindOnce(&RewardsServiceImpl::OnTwitterPublisherInfoSaved,
+                     AsWeakPtr(), callback));
 }
 
 ledger::PublisherInfoList GetRecurringTipsOnFileTaskRunner(
