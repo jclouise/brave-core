@@ -12,6 +12,7 @@ import DonateToTwitterUser from './donateToTwitterUser'
 
 // Utils
 import * as rewardsActions from '../actions/donate_actions'
+import { isTwitterAccount } from '../utils'
 
 interface DonationDialogArgs {
   publisherKey: string
@@ -26,10 +27,6 @@ export class App extends React.Component<Props, {}> {
 
   get actions () {
     return this.props.actions
-  }
-
-  isTwitterAccount = (publisherKey: string) => {
-    return /^twitter#channel:[0-9]+$/.test(publisherKey)
   }
 
   render () {
@@ -47,7 +44,7 @@ export class App extends React.Component<Props, {}> {
     }
 
     let donation
-    if (this.isTwitterAccount(publisherKey)) {
+    if (isTwitterAccount(publisherKey)) {
       const tweetMetaData = this.props.dialogArgs.tweetMetaData
       if (tweetMetaData) {
         donation = (
