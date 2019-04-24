@@ -9,6 +9,10 @@ import { types } from '../constants/donate_types'
 
 export const onCloseDialog = () => action(types.ON_CLOSE_DIALOG)
 
+export const onTweet = (tweetMetaData: RewardsDonate.TweetMetaData) => action(types.ON_TWEET, {
+  tweetMetaData
+})
+
 export const onPublisherBanner = (data: RewardsDonate.Publisher) => action(types.ON_PUBLISHER_BANNER, {
   data
 })
