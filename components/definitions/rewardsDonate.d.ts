@@ -37,6 +37,7 @@ declare namespace RewardsDonate {
     screenName: string
     userId: string
     tweetId: string
+    tweetTimestamp: number
     tweetText: string
   }
 
