@@ -32,11 +32,11 @@ def run_cmd(cmd):
     assert p.returncode == 0, "Error signing"
 
 
-def sign_binaries(base_dir):
+def sign_binaries(base_dir, endswidth=('.exe', '.dll')):
     matches = []
     for root, dirnames, filenames in os.walk(base_dir):
         for filename in filenames:
-            if filename.endswith(('.exe', '.dll')):
+            if filename.endswith(endswidth):
                 matches.append(os.path.join(root, filename))
 
     for binary in matches:
@@ -64,7 +64,7 @@ def _ParseOptions():
 
 
 def main(options):
-    sign_binaries(options.build_dir)
+    sign_binaries(options.build_dir, ('brave.exe', 'chrome.dll', 'chrome_child.dll'))
 
 
 if '__main__' == __name__:
