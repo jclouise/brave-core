@@ -10,6 +10,7 @@
 #include <map>
 #include <memory>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
 
@@ -26,7 +27,6 @@
 #include "extensions/buildflags/buildflags.h"
 #include "extensions/common/one_shot_event.h"
 #include "mojo/public/cpp/bindings/associated_binding.h"
-#include "net/url_request/url_fetcher_delegate.h"
 #include "brave/components/brave_rewards/browser/balance_report.h"
 #include "brave/components/brave_rewards/browser/content_site.h"
 #include "brave/components/brave_rewards/browser/contribution_info.h"
@@ -54,9 +54,10 @@ namespace leveldb {
 class DB;
 }  // namespace leveldb
 
-namespace net {
-class URLFetcher;
-}  // namespace net
+namespace network {
+class SimpleURLLoader;
+}  // namespace network
+
 
 class Profile;
 
@@ -71,9 +72,8 @@ using GetReconcileTimeCallback = base::Callback<void(int32_t)>;
 using GetShortRetriesCallback = base::Callback<void(bool)>;
 
 class RewardsServiceImpl : public RewardsService,
-                            public ledger::LedgerClient,
-                            public net::URLFetcherDelegate,
-                            public base::SupportsWeakPtr<RewardsServiceImpl> {
+                           public ledger::LedgerClient,
+                           public base::SupportsWeakPtr<RewardsServiceImpl> {
  public:
   explicit RewardsServiceImpl(Profile* profile);
   ~RewardsServiceImpl() override;
@@ -435,8 +435,9 @@ class RewardsServiceImpl : public RewardsService,
       ledger::GetExcludedPublishersNumberDBCallback callback,
       int number);
 
-  // URLFetcherDelegate impl
-  void OnURLFetchComplete(const net::URLFetcher* source) override;
+  void OnURLLoaderComplete(network::SimpleURLLoader* loader,
+                           ledger::LoadURLCallback callback,
+                           std::unique_ptr<std::string> response_body);
 
   void StartNotificationTimers(bool main_enabled);
   void StopNotificationTimers();
@@ -500,7 +501,7 @@ class RewardsServiceImpl : public RewardsService,
 #endif
 
   extensions::OneShotEvent ready_;
-  std::map<const net::URLFetcher*, ledger::LoadURLCallback> fetchers_;
+  std::unordered_set<network::SimpleURLLoader*> url_loaders_;
   std::map<uint32_t, std::unique_ptr<base::OneShotTimer>> timers_;
   std::vector<std::string> current_media_fetchers_;
   std::vector<BitmapFetcherService::RequestId> request_ids_;
